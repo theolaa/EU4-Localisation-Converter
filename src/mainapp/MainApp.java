@@ -1,6 +1,7 @@
 package mainapp;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -10,6 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -19,6 +21,8 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
@@ -28,6 +32,7 @@ public class MainApp {
 
 	private static JFrame f = new JFrame();
 	private static GridBagConstraints c;
+	private static JTextArea status = new JTextArea();
 
 	private static Scanner reader;
 	private static ArrayList<LocPrinter> printers;
@@ -56,6 +61,9 @@ public class MainApp {
 		}
 		String[] result = new String[modPaths.size()];
 		result = modPaths.toArray(result);
+		if (!modPaths.isEmpty()) {
+			status.setText(modPaths.get(0) + " Selected");
+		}
 		return result;
 	}
 
@@ -68,14 +76,36 @@ public class MainApp {
 
 		JPanel topbar = new JPanel(new GridBagLayout());
 
+		status.setEditable(false);
+
 		// Select Mod Section
 		JLabel selectModLabel = new JLabel("Select Mod: ");
 		JComboBox<String> selectMod = new JComboBox<String>(getModPaths());
+		selectMod.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				status.setText(selectMod.getSelectedItem().toString() + " Selected");
+			}
+		});
 
 		// Output Directory Section
 		JLabel selectOutputDirectoryLabel = new JLabel("Select Output Directory: ");
 		JTextField selectOutputDirectory = new JTextField(
 				System.getProperty("user.home") + "\\Desktop\\EU4 Localisation Converter Output\\");
+		JButton openOutputDirectory = new JButton("Open Output Directory");
+		openOutputDirectory.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				try {
+					Desktop.getDesktop().open(new File(selectOutputDirectory.getText()));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 
 		// From Language Section
 		JLabel selectFromLanguageLabel = new JLabel("Convert from: ");
@@ -88,7 +118,7 @@ public class MainApp {
 		JCheckBox frenchCheckbox = new JCheckBox("French", true);
 		JCheckBox germanCheckbox = new JCheckBox("German", true);
 		JCheckBox spanishCheckbox = new JCheckBox("Spanish", true);
-		
+
 		JCheckBox separateLanguageFolders = new JCheckBox("Use Separate Language Folders", false);
 
 		JButton startButton = new JButton("Start");
@@ -101,15 +131,23 @@ public class MainApp {
 				emptyFolder(outputFolder);
 				outputFolder.mkdir();
 				ArrayList<String> langs = new ArrayList<String>();
-				if (englishCheckbox.isSelected()) langs.add("english");
-				if (frenchCheckbox.isSelected()) langs.add("french");
-				if (germanCheckbox.isSelected()) langs.add("german");
-				if (spanishCheckbox.isSelected()) langs.add("spanish");
+				if (englishCheckbox.isSelected())
+					langs.add("english");
+				if (frenchCheckbox.isSelected())
+					langs.add("french");
+				if (germanCheckbox.isSelected())
+					langs.add("german");
+				if (spanishCheckbox.isSelected())
+					langs.add("spanish");
 				convert(modFolder, outputFolder, selectFromLanguage.getSelectedItem().toString().toLowerCase(), langs);
 				System.out.println("\nCompleted in " + (System.currentTimeMillis() - startTime) + "ms");
+				status.append("\n\nCompleted in " + (System.currentTimeMillis() - startTime) + "ms");
 				System.out.println("============================================================");
+				status.append("\n\n============================================================");
 			}
 		});
+		
+		JScrollPane scrollPane = new JScrollPane(status);
 
 		c.insets = new Insets(5, 15, 5, 15);
 		c.weighty = 0;
@@ -136,10 +174,16 @@ public class MainApp {
 		topbar.add(selectOutputDirectoryLabel, c);
 
 		c.weightx = 1;
-		c.gridwidth = 3;
+		c.gridwidth = 2;
 		c.gridx = 1;
 		c.gridy = 1;
 		topbar.add(selectOutputDirectory, c);
+
+		c.weightx = 1;
+		c.gridwidth = 1;
+		c.gridx = 3;
+		c.gridy = 1;
+		topbar.add(openOutputDirectory, c);
 
 		// Add Select Output Directory Section
 		c.weightx = 0;
@@ -175,7 +219,7 @@ public class MainApp {
 		c.gridx = 0;
 		c.gridy = 4;
 		topbar.add(startButton, c);
-		
+
 		// Separate Folder Section
 		c.gridwidth = 1;
 		c.weightx = 0;
@@ -183,7 +227,11 @@ public class MainApp {
 		c.gridy = 4;
 		topbar.add(separateLanguageFolders, c);
 
+		// Controls
 		f.add(topbar, BorderLayout.PAGE_START);
+
+		// Status Bar
+		f.add(scrollPane, BorderLayout.CENTER);
 
 		f.setPreferredSize(new Dimension(800, 600));
 		f.setMinimumSize(new Dimension(500, 300));
@@ -195,10 +243,13 @@ public class MainApp {
 	private static void convert(File locDirectory, File outputDirectory, String convertFromLanguage,
 			ArrayList<String> convertToLanguages) {
 		System.out.println("\nMod Directory: " + locDirectory.getAbsolutePath());
-		System.out.println("Output Directory: " + outputDirectory.getAbsolutePath());
-		System.out.println();
+		status.append("\n\nMod Directory: " + locDirectory.getAbsolutePath());
+		System.out.println("Output Directory: " + outputDirectory.getAbsolutePath() + "\n");
+		status.append("\nOutput Directory: " + outputDirectory.getAbsolutePath() + "\n");
 		System.out.println("Converting from: " + convertFromLanguage);
+		status.append("\nConverting from: " + convertFromLanguage);
 		System.out.println("Converting to: " + convertToLanguages.toString());
+		status.append("\nConverting to: " + convertToLanguages.toString());
 		printers = new ArrayList<LocPrinter>();
 		for (String convertToLanguage : convertToLanguages) {
 			printers.add(new LocPrinter(convertToLanguage));
@@ -217,31 +268,26 @@ public class MainApp {
 				proccessDirectory(directoryExtension + "/" + f.getName(), convertFromLanguage);
 			} else {
 				File file = new File(currentDirectory, f.getName());
-				if (!file.getName().contains("_l_" + convertFromLanguage + ".yml")) continue;
+				if (!file.getName().contains("_l_" + convertFromLanguage + ".yml"))
+					continue;
 				try {
 					reader = new Scanner(f, "UTF-8");
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-
-				if (reader.hasNextLine()) {
+				for (LocPrinter lp : printers) {
+					lp.setCurrentFile(file);
+					lp.printFirstLine();
+				}
+				reader.nextLine();
+				while (reader.hasNextLine()) {
+					String line = reader.nextLine();
 					for (LocPrinter lp : printers) {
-						lp.setCurrentFile(file);
-						lp.printFirstLine();
+						lp.print(line);
 					}
-					//System.out.println("Working on " + f.getName());
-					reader.nextLine();
-					while (reader.hasNextLine()) {
-						String line = reader.nextLine();
-						for (LocPrinter lp : printers) {
-							lp.print(line);
-						}
-					}
-					for (LocPrinter lp : printers) {
-						lp.closeWriter();
-					}
-				} else {
-					System.out.println("Skipped " + f.getName());
+				}
+				for (LocPrinter lp : printers) {
+					lp.closeWriter();
 				}
 
 			}
