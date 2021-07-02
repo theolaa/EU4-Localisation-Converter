@@ -31,9 +31,10 @@ import com.formdev.flatlaf.FlatLightLaf;
 public class MainApp {
 
 	private static JFrame f = new JFrame();
-	private static GridBagConstraints c;
+	private static GridBagConstraints c = new GridBagConstraints();
 	private static JTextArea status = new JTextArea();
 	private static JCheckBox separateLanguageFolders;
+	private static JButton startButton;
 
 	private static Scanner reader;
 	private static ArrayList<LocPrinter> printers;
@@ -63,13 +64,16 @@ public class MainApp {
 		String[] result = new String[modPaths.size()];
 		result = modPaths.toArray(result);
 		if (!modPaths.isEmpty()) {
-			status.setText(modPaths.get(0) + " Selected");
+			status.setText("");
+			updateStatus(modPaths.get(0) + " Selected");
+		} else {
+			updateStatus("EU4 Mod Directory Not Found");
+			startButton.setEnabled(false);
 		}
 		return result;
 	}
 
 	private static void createAndShowGUI() {
-		c = new GridBagConstraints();
 
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.getContentPane().setLayout(new BorderLayout());
@@ -79,6 +83,8 @@ public class MainApp {
 
 		status.setEditable(false);
 
+		startButton = new JButton("Start");
+
 		// Select Mod Section
 		JLabel selectModLabel = new JLabel("Select Mod: ");
 		JComboBox<String> selectMod = new JComboBox<String>(getModPaths());
@@ -86,7 +92,8 @@ public class MainApp {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				status.setText(selectMod.getSelectedItem().toString() + " Selected");
+				status.setText("");
+				updateStatus(selectMod.getSelectedItem().toString() + " Selected");
 			}
 		});
 
@@ -95,6 +102,7 @@ public class MainApp {
 		JTextField selectOutputDirectory = new JTextField(
 				System.getProperty("user.home") + "\\Desktop\\EU4 Localisation Converter Output\\");
 		JButton openOutputDirectory = new JButton("Open Output Directory");
+		openOutputDirectory.setEnabled(false);
 		openOutputDirectory.addActionListener(new ActionListener() {
 
 			@Override
@@ -102,11 +110,14 @@ public class MainApp {
 				try {
 					Desktop.getDesktop().open(new File(selectOutputDirectory.getText()));
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		});
+		
+		if (new File(selectOutputDirectory.getText()).exists()) {
+			openOutputDirectory.setEnabled(true);
+		}
 
 		// From Language Section
 		JLabel selectFromLanguageLabel = new JLabel("Convert from: ");
@@ -122,7 +133,6 @@ public class MainApp {
 
 		separateLanguageFolders = new JCheckBox("Use Separate Language Folders", false);
 
-		JButton startButton = new JButton("Start");
 		startButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -131,6 +141,7 @@ public class MainApp {
 				outputFolder = new File(selectOutputDirectory.getText());
 				emptyFolder(outputFolder);
 				outputFolder.mkdir();
+				openOutputDirectory.setEnabled(true);
 				ArrayList<String> langs = new ArrayList<String>();
 				if (englishCheckbox.isSelected())
 					langs.add("english");
@@ -244,7 +255,7 @@ public class MainApp {
 		updateStatus("\nMod Directory: " + locDirectory.getAbsolutePath());
 		updateStatus("Output Directory: " + outputDirectory.getAbsolutePath() + "\n");
 		updateStatus("Converting from: " + convertFromLanguage);
-		updateStatus("Converting to: " + convertToLanguages.toString());
+		updateStatus("Converting to: " + convertToLanguages.toString() + "\n");
 		printers = new ArrayList<LocPrinter>();
 		for (String convertToLanguage : convertToLanguages) {
 			printers.add(new LocPrinter(outputDirectory, convertToLanguage, separateLanguageFolders.isSelected()));
@@ -256,6 +267,10 @@ public class MainApp {
 
 	private static void proccessDirectory(String directoryExtension, String convertFromLanguage) {
 		File[] files = new File(modFolder, directoryExtension).listFiles();
+		if (files == null) {
+			updateStatus("No Localisation Files Found");
+			return;
+		}
 		File currentDirectory = new File(outputFolder, directoryExtension);
 		currentDirectory.mkdirs();
 		for (File f : files) {
@@ -301,6 +316,11 @@ public class MainApp {
 			}
 			folder.delete();
 		}
+	}
+
+	private static void updateStatus() {
+		System.out.println();
+		status.append("\n");
 	}
 
 	private static void updateStatus(String message) {
