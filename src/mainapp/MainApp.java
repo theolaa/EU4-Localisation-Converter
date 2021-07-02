@@ -18,6 +18,7 @@ import java.util.Scanner;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -101,7 +102,26 @@ public class MainApp {
 		JLabel selectOutputDirectoryLabel = new JLabel("Select Output Directory: ");
 		JTextField selectOutputDirectory = new JTextField(
 				System.getProperty("user.home") + "\\Desktop\\EU4 Localisation Converter Output\\");
+		JFileChooser selectOutputDirectoryNew = new JFileChooser(
+				System.getProperty("user.home") + "/Desktop/EU4 Localisation Converter Output/");
+		selectOutputDirectoryNew.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		selectOutputDirectoryNew.setAcceptAllFileFilterUsed(false);
+
 		JButton openOutputDirectory = new JButton("Open Output Directory");
+
+		JButton openSelectDirectoryDialgogue = new JButton("Set Folder");
+		openSelectDirectoryDialgogue.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int statusResult = selectOutputDirectoryNew.showOpenDialog(f);
+				if (statusResult == 0) {
+					selectOutputDirectory.setText(selectOutputDirectoryNew.getSelectedFile().toString());
+					openOutputDirectory.setEnabled(true);
+				}
+			}
+		});
+
 		openOutputDirectory.setEnabled(false);
 		openOutputDirectory.addActionListener(new ActionListener() {
 
@@ -109,12 +129,17 @@ public class MainApp {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					Desktop.getDesktop().open(new File(selectOutputDirectory.getText()));
+				} catch (IllegalArgumentException e) {
+					updateStatus("Folder does not exist: " + selectOutputDirectory.getText());
+					updateStatus("Create the folder first, or use the 'Set Folder' button.");
+					updateStatus();
 				} catch (IOException e) {
-					e.printStackTrace();
+					updateStatus("You don't have permission to use: " + selectOutputDirectory.getText());
+					updateStatus();
 				}
 			}
 		});
-		
+
 		if (new File(selectOutputDirectory.getText()).exists()) {
 			openOutputDirectory.setEnabled(true);
 		}
@@ -132,6 +157,7 @@ public class MainApp {
 		JCheckBox spanishCheckbox = new JCheckBox("Spanish", true);
 
 		separateLanguageFolders = new JCheckBox("Use Separate Language Folders", false);
+		separateLanguageFolders.setSelected(true);
 
 		startButton.addActionListener(new ActionListener() {
 			@Override
@@ -189,30 +215,36 @@ public class MainApp {
 		c.gridy = 1;
 		topbar.add(selectOutputDirectory, c);
 
-		c.weightx = 1;
+		c.weightx = 0;
 		c.gridwidth = 1;
 		c.gridx = 3;
 		c.gridy = 1;
+		topbar.add(openSelectDirectoryDialgogue, c);
+
+		c.weightx = 0;
+		c.gridwidth = 1;
+		c.gridx = 3;
+		c.gridy = 2;
 		topbar.add(openOutputDirectory, c);
 
 		// Add Select Output Directory Section
 		c.weightx = 0;
 		c.gridwidth = 1;
 		c.gridx = 0;
-		c.gridy = 2;
+		c.gridy = 3;
 		topbar.add(selectFromLanguageLabel, c);
 
 		c.weightx = 1;
 		c.gridwidth = 3;
 		c.gridx = 1;
-		c.gridy = 2;
+		c.gridy = 3;
 		topbar.add(selectFromLanguage, c);
 
 		// Add To Language Section
 		c.weightx = 0;
 		c.gridwidth = 1;
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = 4;
 		topbar.add(checkBoxLabel, c);
 
 		// Add Checkboxes
@@ -227,14 +259,14 @@ public class MainApp {
 		// Add Start Button
 		c.gridwidth = 2;
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 5;
 		topbar.add(startButton, c);
 
 		// Separate Folder Section
 		c.gridwidth = 1;
 		c.weightx = 0;
 		c.gridx = 3;
-		c.gridy = 4;
+		c.gridy = 5;
 		topbar.add(separateLanguageFolders, c);
 
 		// Controls
