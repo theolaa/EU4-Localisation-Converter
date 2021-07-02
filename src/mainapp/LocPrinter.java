@@ -1,13 +1,15 @@
 package mainapp;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 public class LocPrinter {
 	private String language;
 	private File baseDir;
-	private FileWriter fw;
+	private OutputStreamWriter writer;
 	private boolean separateFolder;
 	public LocPrinter(File baseDir, String language, boolean separateFolder) {
 		this.baseDir = baseDir;
@@ -31,7 +33,10 @@ public class LocPrinter {
 		folderToWrite.mkdirs();
 		File fileToWrite = new File(pathname + "/" + filename);
 		try {
-			fw = new FileWriter(fileToWrite);
+			writer = new OutputStreamWriter(
+				     new FileOutputStream(fileToWrite),
+				     Charset.forName("UTF-8").newEncoder()
+				 );
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -40,10 +45,8 @@ public class LocPrinter {
 	
 	public void printFirstLine() {
 		try {
-			fw.write(0xef);
-			fw.write(0xbb);
-			fw.write(0xbf);
-			fw.write("l_"+language+":" + System.lineSeparator());
+			writer.write("\ufeff");
+			writer.write("l_"+language+":" + System.lineSeparator());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -52,7 +55,7 @@ public class LocPrinter {
 	
 	public void print(String line) {
 		try {
-			fw.write(line + System.lineSeparator());
+			writer.write(line + System.lineSeparator());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -61,7 +64,7 @@ public class LocPrinter {
 	
 	public void closeWriter() {
 		try {
-			fw.close();
+			writer.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
