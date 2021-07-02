@@ -33,6 +33,7 @@ public class MainApp {
 	private static JFrame f = new JFrame();
 	private static GridBagConstraints c;
 	private static JTextArea status = new JTextArea();
+	private static JCheckBox separateLanguageFolders;
 
 	private static Scanner reader;
 	private static ArrayList<LocPrinter> printers;
@@ -119,7 +120,7 @@ public class MainApp {
 		JCheckBox germanCheckbox = new JCheckBox("German", true);
 		JCheckBox spanishCheckbox = new JCheckBox("Spanish", true);
 
-		JCheckBox separateLanguageFolders = new JCheckBox("Use Separate Language Folders", false);
+		separateLanguageFolders = new JCheckBox("Use Separate Language Folders", false);
 
 		JButton startButton = new JButton("Start");
 		startButton.addActionListener(new ActionListener() {
@@ -140,13 +141,11 @@ public class MainApp {
 				if (spanishCheckbox.isSelected())
 					langs.add("spanish");
 				convert(modFolder, outputFolder, selectFromLanguage.getSelectedItem().toString().toLowerCase(), langs);
-				System.out.println("\nCompleted in " + (System.currentTimeMillis() - startTime) + "ms");
-				status.append("\n\nCompleted in " + (System.currentTimeMillis() - startTime) + "ms");
-				System.out.println("============================================================");
-				status.append("\n\n============================================================");
+				updateStatus("\nCompleted in " + (System.currentTimeMillis() - startTime) + "ms");
+				updateStatus("\n============================================================");
 			}
 		});
-		
+
 		JScrollPane scrollPane = new JScrollPane(status);
 
 		c.insets = new Insets(5, 15, 5, 15);
@@ -242,17 +241,13 @@ public class MainApp {
 
 	private static void convert(File locDirectory, File outputDirectory, String convertFromLanguage,
 			ArrayList<String> convertToLanguages) {
-		System.out.println("\nMod Directory: " + locDirectory.getAbsolutePath());
-		status.append("\n\nMod Directory: " + locDirectory.getAbsolutePath());
-		System.out.println("Output Directory: " + outputDirectory.getAbsolutePath() + "\n");
-		status.append("\nOutput Directory: " + outputDirectory.getAbsolutePath() + "\n");
-		System.out.println("Converting from: " + convertFromLanguage);
-		status.append("\nConverting from: " + convertFromLanguage);
-		System.out.println("Converting to: " + convertToLanguages.toString());
-		status.append("\nConverting to: " + convertToLanguages.toString());
+		updateStatus("\nMod Directory: " + locDirectory.getAbsolutePath());
+		updateStatus("Output Directory: " + outputDirectory.getAbsolutePath() + "\n");
+		updateStatus("Converting from: " + convertFromLanguage);
+		updateStatus("Converting to: " + convertToLanguages.toString());
 		printers = new ArrayList<LocPrinter>();
 		for (String convertToLanguage : convertToLanguages) {
-			printers.add(new LocPrinter(convertToLanguage));
+			printers.add(new LocPrinter(outputDirectory, convertToLanguage, separateLanguageFolders.isSelected()));
 		}
 
 		proccessDirectory("", convertFromLanguage);
@@ -294,7 +289,7 @@ public class MainApp {
 		}
 	}
 
-	public static void emptyFolder(File folder) {
+	private static void emptyFolder(File folder) {
 		File[] files = folder.listFiles();
 		if (files != null) { // some JVMs return null for empty dirs
 			for (File f : files) {
@@ -306,6 +301,11 @@ public class MainApp {
 			}
 			folder.delete();
 		}
+	}
+
+	private static void updateStatus(String message) {
+		System.out.println(message);
+		status.append(message + "\n");
 	}
 
 }

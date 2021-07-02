@@ -6,17 +6,32 @@ import java.io.IOException;
 
 public class LocPrinter {
 	private String language;
+	private File baseDir;
 	private FileWriter fw;
-	public LocPrinter(String language) {
+	private boolean separateFolder;
+	public LocPrinter(File baseDir, String language, boolean separateFolder) {
+		this.baseDir = baseDir;
 		this.language = language;
+		this.separateFolder = separateFolder;
 	}
 	
 	public void setCurrentFile(File f) {
-		String pathname = f.getAbsolutePath();
-		pathname = pathname.replaceFirst("_l_.+\\.", "_l_" + language + ".");
-		f = new File(pathname);
+		String pathname;
+		if (separateFolder) {
+			if (f.getAbsolutePath().contains(File.separator + "replace" + File.separator)) {
+				pathname = f.getParentFile().getAbsolutePath();
+			} else {
+				pathname = baseDir.getAbsolutePath() + "/" + language + "/";
+			}
+		} else {
+			 pathname = f.getParentFile().getAbsolutePath();
+		}
+		String filename = f.getName().replaceFirst("_l_.+\\.", "_l_" + language + ".");
+		File folderToWrite = new File(pathname);
+		folderToWrite.mkdirs();
+		File fileToWrite = new File(pathname + "/" + filename);
 		try {
-			fw = new FileWriter(f);
+			fw = new FileWriter(fileToWrite);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -28,7 +43,7 @@ public class LocPrinter {
 			fw.write(0xef);
 			fw.write(0xbb);
 			fw.write(0xbf);
-			fw.write("l_"+language+":\n");
+			fw.write("l_"+language+":" + System.lineSeparator());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -37,7 +52,7 @@ public class LocPrinter {
 	
 	public void print(String line) {
 		try {
-			fw.write(line + "\n");
+			fw.write(line + System.lineSeparator());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
