@@ -3,7 +3,7 @@ This tool allows you to write localisation for you EU4 mod in whichever language
 
 **NOTE:** This tool does NOT translate your text! It only creates the loc files for the other languages with the text that you've already written.
 
-**Download:** [latest version](https://github.com/theolaa/EU4-Localisation-Converter/releases/tag/v0.3-alpha) | [old versions](https://github.com/theolaa/EU4-Localisation-Converter/releases)
+**Download:** [latest version](https://github.com/theolaa/EU4-Localisation-Converter/releases/latest) | [old versions](https://github.com/theolaa/EU4-Localisation-Converter/releases)
 
 <hr>
 
