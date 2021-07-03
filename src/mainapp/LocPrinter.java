@@ -55,7 +55,7 @@ public class LocPrinter {
 	
 	public void print(String line) {
 		try {
-			writer.write(line + System.lineSeparator());
+			writer.write(line);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

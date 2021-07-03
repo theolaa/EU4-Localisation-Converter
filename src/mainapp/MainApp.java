@@ -325,13 +325,13 @@ public class MainApp {
 				while (reader.hasNextLine()) {
 					String line = reader.nextLine();
 					for (LocPrinter lp : printers) {
-						lp.print(line);
+						lp.print(line + (reader.hasNext() ? System.lineSeparator() : ""));
 					}
 				}
 				for (LocPrinter lp : printers) {
 					lp.closeWriter();
 				}
-
+				reader.close();
 			}
 		}
 	}
