@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class LocPrinter {
-	private String language;
-	private File baseDir;
+	private final String language;
+	private final File baseDir;
 	private OutputStreamWriter writer;
-	private boolean separateFolder;
+	private final boolean separateFolder;
 	public LocPrinter(File baseDir, String language, boolean separateFolder) {
 		this.baseDir = baseDir;
 		this.language = language;
@@ -35,7 +35,7 @@ public class LocPrinter {
 		try {
 			writer = new OutputStreamWriter(
 				     new FileOutputStream(fileToWrite),
-				     Charset.forName("UTF-8").newEncoder()
+				     StandardCharsets.UTF_8.newEncoder()
 				 );
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

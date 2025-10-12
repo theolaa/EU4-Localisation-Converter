@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -31,9 +32,9 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 public class MainApp {
 
-	private static JFrame f = new JFrame();
-	private static GridBagConstraints c = new GridBagConstraints();
-	private static JTextArea status = new JTextArea();
+	private static final JFrame f = new JFrame();
+	private static final GridBagConstraints c = new GridBagConstraints();
+	private static final JTextArea status = new JTextArea();
 	private static JCheckBox separateLanguageFolders;
 	private static JButton startButton;
 
@@ -66,7 +67,7 @@ public class MainApp {
 		result = modPaths.toArray(result);
 		if (!modPaths.isEmpty()) {
 			status.setText("");
-			updateStatus(modPaths.get(0) + " Selected");
+			updateStatus(modPaths.getFirst() + " Selected");
 		} else {
 			updateStatus("EU4 Mod Directory Not Found");
 			startButton.setEnabled(false);
@@ -313,11 +314,13 @@ public class MainApp {
 				if (!file.getName().contains("_l_" + convertFromLanguage + ".yml"))
 					continue;
 				try {
-					reader = new Scanner(f, "UTF-8");
+					reader = new Scanner(f, StandardCharsets.UTF_8);
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
-				}
-				for (LocPrinter lp : printers) {
+				} catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                for (LocPrinter lp : printers) {
 					lp.setCurrentFile(file);
 					lp.printFirstLine();
 				}
