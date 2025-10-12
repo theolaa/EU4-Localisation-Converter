@@ -27,6 +27,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileSystemView;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
@@ -41,13 +42,13 @@ public class MainApp {
 
     private static Scanner reader;
     private static ArrayList<LocPrinter> printers;
-    private static File inputFolder;
-    private static File modFolder;
+    private static File modsFolder;
+    private static File localisationFolder;
     private static File outputFolder;
 
     public static void main(String[] args) {
-        inputFolder = new File(
-                System.getProperty("user.home") + "/Documents/Paradox Interactive/Europa Universalis IV/mod");
+        modsFolder = new File(
+                FileSystemView.getFileSystemView().getDefaultDirectory().getPath(), "Paradox Interactive/Europa Universalis IV/mod");
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 FlatLightLaf.install();
@@ -59,7 +60,7 @@ public class MainApp {
 
     private static String[] getModPaths() {
         ArrayList<String> modPaths = new ArrayList<String>();
-        for (File f : inputFolder.listFiles()) {
+        for (File f : modsFolder.listFiles()) {
             if (f.isDirectory()) {
                 modPaths.add(f.getName());
             }
@@ -165,7 +166,7 @@ public class MainApp {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 long startTime = System.currentTimeMillis();
-                modFolder = new File(inputFolder, selectMod.getSelectedItem().toString());
+                localisationFolder = new File(modsFolder, selectMod.getSelectedItem().toString() + "/localisation");
                 outputFolder = new File(selectOutputDirectory.getText());
                 emptyFolder(outputFolder);
                 outputFolder.mkdir();
@@ -181,8 +182,7 @@ public class MainApp {
                     langs.add("spanish");
                 String convertFromLanguage = selectFromLanguage.getSelectedItem().toString().toLowerCase();
                 langs.remove(convertFromLanguage);
-                File locFolder = new File(modFolder, "localisation");
-                convert(locFolder, convertFromLanguage, langs);
+                convert(localisationFolder, convertFromLanguage, langs);
                 updateStatus("Completed in " + (System.currentTimeMillis() - startTime) + "ms");
                 updateStatus("\n============================================================");
             }
@@ -294,11 +294,11 @@ public class MainApp {
         updateStatus("Converting to: " + convertToLanguages.toString() + "\n");
         printers = new ArrayList<LocPrinter>();
         for (String convertToLanguage : convertToLanguages) {
-            printers.add(new LocPrinter(modFolder, convertToLanguage));
+            printers.add(new LocPrinter(localisationFolder, convertToLanguage));
         }
 
         cleanOtherLanguages(locDirectory, convertFromLanguage, convertToLanguages);
-        processLocalisation("localisation", convertFromLanguage, printers, false);
+        processLocalisation("", convertFromLanguage, printers, false);
 
     }
 
@@ -311,7 +311,7 @@ public class MainApp {
      */
     private static void processLocalisation(String directoryExtension, String convertFromLanguage, ArrayList<LocPrinter> printers, boolean isLanguageFolder) {
         updateStatus("\nProcessing: " + directoryExtension);
-        File currentDirectory = new File(modFolder, directoryExtension);
+        File currentDirectory = new File(localisationFolder, directoryExtension);
         File[] files = currentDirectory.listFiles();
         if (files == null) {
             updateStatus("No Localisation Files Found");
