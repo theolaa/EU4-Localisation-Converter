@@ -1,7 +1,6 @@
 package mainapp;
 
 import java.awt.BorderLayout;
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -19,13 +18,11 @@ import java.util.Scanner;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileSystemView;
 
@@ -39,7 +36,6 @@ public class MainApp {
     private static JButton startButton;
 
     private static Scanner reader;
-    private static ArrayList<LocPrinter> printers;
     private static File modsFolder;
     private static File localisationFolder;
 
@@ -211,7 +207,7 @@ public class MainApp {
         updateStatus("\nLocalisation Directory: " + locDirectory.getAbsolutePath());
         updateStatus("Converting from: " + convertFromLanguage);
         updateStatus("Converting to: " + convertToLanguages.toString() + "\n");
-        printers = new ArrayList<LocPrinter>();
+        ArrayList<LocPrinter> printers = new ArrayList<LocPrinter>();
         for (String convertToLanguage : convertToLanguages) {
             printers.add(new LocPrinter(localisationFolder, convertToLanguage));
         }
