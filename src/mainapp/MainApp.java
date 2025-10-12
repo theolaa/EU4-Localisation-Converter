@@ -44,7 +44,6 @@ public class MainApp {
     private static ArrayList<LocPrinter> printers;
     private static File modsFolder;
     private static File localisationFolder;
-    private static File outputFolder;
 
     public static void main(String[] args) {
         modsFolder = new File(
@@ -101,52 +100,6 @@ public class MainApp {
             }
         });
 
-        // Output Directory Section
-        JLabel selectOutputDirectoryLabel = new JLabel("Select Output Directory: ");
-        JTextField selectOutputDirectory = new JTextField(
-                System.getProperty("user.home") + "\\Desktop\\EU4 Localisation Converter Output\\");
-        JFileChooser selectOutputDirectoryNew = new JFileChooser(
-                System.getProperty("user.home") + "/Desktop/EU4 Localisation Converter Output/");
-        selectOutputDirectoryNew.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        selectOutputDirectoryNew.setAcceptAllFileFilterUsed(false);
-
-        JButton openOutputDirectory = new JButton("Open Output Directory");
-
-        JButton openSelectDirectoryDialgogue = new JButton("Set Folder");
-        openSelectDirectoryDialgogue.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int statusResult = selectOutputDirectoryNew.showOpenDialog(f);
-                if (statusResult == 0) {
-                    selectOutputDirectory.setText(selectOutputDirectoryNew.getSelectedFile().toString());
-                    openOutputDirectory.setEnabled(true);
-                }
-            }
-        });
-
-        openOutputDirectory.setEnabled(false);
-        openOutputDirectory.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                try {
-                    Desktop.getDesktop().open(new File(selectOutputDirectory.getText()));
-                } catch (IllegalArgumentException e) {
-                    updateStatus("Folder does not exist: " + selectOutputDirectory.getText());
-                    updateStatus("Create the folder first, or use the 'Set Folder' button.");
-                    updateStatus();
-                } catch (IOException e) {
-                    updateStatus("You don't have permission to use: " + selectOutputDirectory.getText());
-                    updateStatus();
-                }
-            }
-        });
-
-        if (new File(selectOutputDirectory.getText()).exists()) {
-            openOutputDirectory.setEnabled(true);
-        }
-
         // From Language Section
         JLabel selectFromLanguageLabel = new JLabel("Convert from: ");
         JComboBox<String> selectFromLanguage = new JComboBox<String>(
@@ -167,10 +120,6 @@ public class MainApp {
             public void actionPerformed(ActionEvent arg0) {
                 long startTime = System.currentTimeMillis();
                 localisationFolder = new File(modsFolder, selectMod.getSelectedItem().toString() + "/localisation");
-                outputFolder = new File(selectOutputDirectory.getText());
-                emptyFolder(outputFolder);
-                outputFolder.mkdir();
-                openOutputDirectory.setEnabled(true);
                 ArrayList<String> langs = new ArrayList<String>();
                 if (englishCheckbox.isSelected())
                     langs.add("english");
@@ -206,31 +155,6 @@ public class MainApp {
         c.gridx = 1;
         c.gridy = 0;
         topbar.add(selectMod, c);
-
-        // Add Select Output Directory Section
-        c.weightx = 0;
-        c.gridwidth = 1;
-        c.gridx = 0;
-        c.gridy = 1;
-        topbar.add(selectOutputDirectoryLabel, c);
-
-        c.weightx = 1;
-        c.gridwidth = 2;
-        c.gridx = 1;
-        c.gridy = 1;
-        topbar.add(selectOutputDirectory, c);
-
-        c.weightx = 0;
-        c.gridwidth = 1;
-        c.gridx = 3;
-        c.gridy = 1;
-        topbar.add(openSelectDirectoryDialgogue, c);
-
-        c.weightx = 0;
-        c.gridwidth = 1;
-        c.gridx = 3;
-        c.gridy = 2;
-        topbar.add(openOutputDirectory, c);
 
         // Add Select Output Directory Section
         c.weightx = 0;
