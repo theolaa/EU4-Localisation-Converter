@@ -294,11 +294,11 @@ public class MainApp {
 			printers.add(new LocPrinter(outputDirectory, convertToLanguage, separateLanguageFolders.isSelected()));
 		}
 
-		proccessDirectory("", convertFromLanguage);
+		processDirectory("", convertFromLanguage);
 
 	}
 
-	private static void proccessDirectory(String directoryExtension, String convertFromLanguage) {
+	private static void processDirectory(String directoryExtension, String convertFromLanguage) {
 		File[] files = new File(modFolder, directoryExtension).listFiles();
 		if (files == null) {
 			updateStatus("No Localisation Files Found");
@@ -308,7 +308,7 @@ public class MainApp {
 		currentDirectory.mkdirs();
 		for (File f : files) {
 			if (f.isDirectory()) {
-				proccessDirectory(directoryExtension + "/" + f.getName(), convertFromLanguage);
+				processDirectory(directoryExtension + "/" + f.getName(), convertFromLanguage);
 			} else {
 				File file = new File(currentDirectory, f.getName());
 				if (!file.getName().contains("_l_" + convertFromLanguage + ".yml"))
