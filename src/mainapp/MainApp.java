@@ -11,8 +11,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -178,7 +181,9 @@ public class MainApp {
 					langs.add("german");
 				if (spanishCheckbox.isSelected())
 					langs.add("spanish");
-				convert(modFolder, outputFolder, selectFromLanguage.getSelectedItem().toString().toLowerCase(), langs);
+                String convertFromLanguage = selectFromLanguage.getSelectedItem().toString().toLowerCase();
+                langs.remove(convertFromLanguage);
+				convert(modFolder, outputFolder, convertFromLanguage, langs);
 				updateStatus("\nCompleted in " + (System.currentTimeMillis() - startTime) + "ms");
 				updateStatus("\n============================================================");
 			}
@@ -294,13 +299,14 @@ public class MainApp {
 			printers.add(new LocPrinter(outputDirectory, convertToLanguage, separateLanguageFolders.isSelected()));
 		}
 
-		processDirectory(convertFromLanguage, convertFromLanguage, true);
-        processDirectory("replace", convertFromLanguage, false);
-        processDirectory("", convertFromLanguage, false);
+        cleanOtherLanguages(locDirectory, convertFromLanguage, convertToLanguages);
+
+        processDirectory("", convertFromLanguage);
+		processDirectory(convertFromLanguage, convertFromLanguage);
 
 	}
 
-	private static void processDirectory(String directoryExtension, String convertFromLanguage, boolean recursive) {
+	private static void processDirectory(String directoryExtension, String convertFromLanguage) {
 		File[] files = new File(modFolder, directoryExtension).listFiles();
 		if (files == null) {
 			updateStatus("No Localisation Files Found");
@@ -309,8 +315,8 @@ public class MainApp {
 		File currentDirectory = new File(outputFolder, directoryExtension);
 		currentDirectory.mkdirs();
 		for (File f : files) {
-			if (f.isDirectory() && recursive) {
-				processDirectory(directoryExtension + "/" + f.getName(), convertFromLanguage, true);
+			if (f.isDirectory()) {
+				processDirectory(directoryExtension + "/" + f.getName(), convertFromLanguage);
 			} else {
 				File file = new File(currentDirectory, f.getName());
 				if (!file.getName().contains("_l_" + convertFromLanguage + ".yml"))
@@ -354,6 +360,28 @@ public class MainApp {
 			folder.delete();
 		}
 	}
+
+
+    private static void cleanOtherLanguages(File locDirectory, String convertFromLanguage, ArrayList<String> convertToLanguages) {
+        // Delete other language folders
+        for (String lang : convertToLanguages) {
+            emptyFolder(new File(locDirectory, lang));
+        }
+        cleanOtherLanguages(locDirectory, convertFromLanguage);
+    }
+
+    public static void cleanOtherLanguages(File dir, String convertFromLanguage) {
+        for (File f : dir.listFiles()) {
+            if (f.isDirectory()) {
+                cleanOtherLanguages(f, convertFromLanguage);
+            } else {
+                String name = f.getName();
+                if (name.contains(".yml") && !name.contains("_l_" + convertFromLanguage)) {
+                    f.delete();
+                }
+            }
+        }
+    }
 
 	private static void updateStatus() {
 		System.out.println();
