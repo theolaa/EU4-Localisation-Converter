@@ -298,8 +298,7 @@ public class MainApp {
         }
 
         cleanOtherLanguages(locDirectory, convertFromLanguage, convertToLanguages);
-        processCombinedLoc("localisation", convertFromLanguage, printers);
-        processSeparateLoc("localisation/" + convertFromLanguage, convertFromLanguage, printers);
+        processLocalisation("localisation", convertFromLanguage, printers, false);
 
     }
 
@@ -310,7 +309,7 @@ public class MainApp {
      * @param convertFromLanguage The language that is being converted from
      * @param printers            The list of LocPrinters that will copy the loc files to each language
      */
-    private static void processCombinedLoc(String directoryExtension, String convertFromLanguage, ArrayList<LocPrinter> printers) {
+    private static void processLocalisation(String directoryExtension, String convertFromLanguage, ArrayList<LocPrinter> printers, boolean isLanguageFolder) {
         updateStatus("\nProcessing: " + directoryExtension);
         File currentDirectory = new File(modFolder, directoryExtension);
         File[] files = currentDirectory.listFiles();
@@ -321,9 +320,9 @@ public class MainApp {
         for (File f : files) {
             if (f.isDirectory()) {
                 if (f.getName().equals(convertFromLanguage)) {
-                    updateStatus("Ignoring " + f.getName());
+                    processLocalisation(directoryExtension + "/" + f.getName(), convertFromLanguage, printers, true);
                 } else {
-                    processCombinedLoc(directoryExtension + "/" + f.getName(), convertFromLanguage, printers);
+                    processLocalisation(directoryExtension + "/" + f.getName(), convertFromLanguage, printers, isLanguageFolder);
                 }
             } else {
                 if (!f.getName().contains(".yml")) {
@@ -339,58 +338,13 @@ public class MainApp {
                     throw new RuntimeException(e);
                 }
                 for (LocPrinter lp : printers) {
-                    lp.setCurrentFile(directoryExtension, f);
-                    lp.printFirstLine();
-                }
-                reader.nextLine();
-                while (reader.hasNextLine()) {
-                    String line = reader.nextLine();
-                    for (LocPrinter lp : printers) {
-                        lp.print(line + (reader.hasNext() ? System.lineSeparator() : ""));
+                    if (isLanguageFolder) {
+                        String printerLang = lp.getLanguage();
+                        String newDirExtension = directoryExtension.replace(convertFromLanguage, printerLang);
+                        lp.setCurrentFile(newDirExtension, f);
+                    } else {
+                        lp.setCurrentFile(directoryExtension, f);
                     }
-                }
-                for (LocPrinter lp : printers) {
-                    lp.closeWriter();
-                }
-                reader.close();
-            }
-        }
-        updateStatus("\nFinished Processing: " + directoryExtension);
-        updateStatus();
-    }
-
-    private static void processSeparateLoc(String directoryExtension, String convertFromLanguage, ArrayList<LocPrinter> printers) {
-        updateStatus("Processing: " + directoryExtension);
-        File currentDirectory = new File(modFolder, directoryExtension);
-        File[] files = currentDirectory.listFiles();
-        if (files == null) {
-            updateStatus("No Localisation Files Found");
-            return;
-        }
-        for (File f : files) {
-            if (f.isDirectory()) {
-                if (f.getName().equals(convertFromLanguage)) {
-                    updateStatus("Ignoring " + f.getName());
-                } else {
-                    processCombinedLoc(directoryExtension + "/" + f.getName(), convertFromLanguage, printers);
-                }
-            } else {
-                if (!f.getName().contains(".yml")) {
-                    updateStatus("Ignoring " + f.getName());
-                    continue;
-                }
-                updateStatus("Copying " + f.getName());
-                try {
-                    reader = new Scanner(f, StandardCharsets.UTF_8);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                for (LocPrinter lp : printers) {
-                    String printerLang = lp.getLanguage();
-                    String newDirExtension = directoryExtension.replace(convertFromLanguage, printerLang);
-                    lp.setCurrentFile(newDirExtension, f);
                     lp.printFirstLine();
                 }
                 reader.nextLine();
