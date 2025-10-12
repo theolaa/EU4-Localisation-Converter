@@ -36,8 +36,6 @@ public class MainApp {
     private static final JFrame f = new JFrame();
     private static final GridBagConstraints c = new GridBagConstraints();
     private static final JTextArea status = new JTextArea();
-    //TODO remove separateLanguageFolders
-    private static JCheckBox separateLanguageFolders;
     private static JButton startButton;
 
     private static Scanner reader;
@@ -111,9 +109,6 @@ public class MainApp {
         JCheckBox frenchCheckbox = new JCheckBox("French", true);
         JCheckBox germanCheckbox = new JCheckBox("German", true);
         JCheckBox spanishCheckbox = new JCheckBox("Spanish", true);
-
-        separateLanguageFolders = new JCheckBox("Use Separate Language Folders", false);
-        separateLanguageFolders.setSelected(true);
 
         startButton.addActionListener(new ActionListener() {
             @Override
