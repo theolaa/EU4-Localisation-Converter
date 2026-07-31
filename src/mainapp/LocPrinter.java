@@ -7,68 +7,60 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
 public class LocPrinter {
-	private final String language;
-	private final File baseDir;
-	private OutputStreamWriter writer;
-	private final boolean separateFolder;
-	public LocPrinter(File baseDir, String language, boolean separateFolder) {
-		this.baseDir = baseDir;
-		this.language = language;
-		this.separateFolder = separateFolder;
-	}
-	
-	public void setCurrentFile(File f) {
-		String pathname;
-		if (separateFolder) {
-			if (f.getAbsolutePath().contains(File.separator + "replace" + File.separator)) {
-				pathname = f.getParentFile().getAbsolutePath();
-			} else {
-				pathname = baseDir.getAbsolutePath() + "/" + language + "/";
-			}
-		} else {
-			 pathname = f.getParentFile().getAbsolutePath();
-		}
-		String filename = f.getName().replaceFirst("_l_.+\\.", "_l_" + language + ".");
-		File folderToWrite = new File(pathname);
-		folderToWrite.mkdirs();
-		File fileToWrite = new File(pathname + "/" + filename);
-		try {
-			writer = new OutputStreamWriter(
-				     new FileOutputStream(fileToWrite),
-				     StandardCharsets.UTF_8.newEncoder()
-				 );
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	public void printFirstLine() {
-		try {
-			writer.write("\ufeff");
-			writer.write("l_"+language+":" + System.lineSeparator());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	public void print(String line) {
-		try {
-			writer.write(line);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	public void closeWriter() {
-		try {
-			writer.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
+    private final String language;
+    private final File baseDir;
+    private OutputStreamWriter writer;
+
+    public LocPrinter(File baseDir, String language) {
+        this.baseDir = baseDir;
+        this.language = language;
+    }
+
+    public void setCurrentFile(String dirExtension, File sourceFile) {
+        new File(baseDir, dirExtension).mkdirs();
+        String name = sourceFile.getName();
+        name = name.replaceFirst("_l_.*\\.yml", "_l_" + language + ".yml");
+        File destFile = new File(baseDir, dirExtension + "/" + name);
+        try {
+            writer = new OutputStreamWriter(
+                    new FileOutputStream(destFile),
+                    StandardCharsets.UTF_8.newEncoder()
+            );
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void printFirstLine() {
+        try {
+            writer.write("\ufeff");
+            writer.write("l_" + language + ":" + System.lineSeparator());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void print(String line) {
+        try {
+            writer.write(line);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public void closeWriter() {
+        try {
+            writer.close();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    public String getLanguage() {
+        return language;
+    }
 }
