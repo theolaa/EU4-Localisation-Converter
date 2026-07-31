@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystem;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -36,12 +37,28 @@ public class MainApp {
     private static JButton startButton;
 
     private static Scanner reader;
+
+    // Starts from user's home folder e.g. C:/Users/username or /home/username
+    private static final String WINDOWS_PATH = "Documents/Paradox Interactive";
+    private static final String LINUX_PATH = ".local/share/Paradox Interactive";
+
     private static File modsFolder;
     private static File localisationFolder;
 
-    public static void main(String[] args) {
-        modsFolder = new File(
-                FileSystemView.getFileSystemView().getDefaultDirectory().getPath(), "Paradox Interactive/Europa Universalis IV/mod");
+    public static void main(String[] args) throws Exception {
+        File userHome = new File(System.getProperty("user.home"));
+
+        String systemDependantPath;
+        String os = System.getProperty("os.name").toLowerCase();
+
+        if (os.contains("windows")) { systemDependantPath = WINDOWS_PATH; }
+        else if (os.contains("linux")) { systemDependantPath = LINUX_PATH; }
+        else {
+            throw new Exception("Unknown OS: " + os);
+        }
+
+        File paradoxDir = new File(userHome, systemDependantPath);
+        modsFolder = new File(paradoxDir , "Europa Universalis IV/mod");
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 FlatLightLaf.install();
